@@ -32,7 +32,8 @@ describe('Controllers and their Templates', function(){
             $templateCache = _$templateCache_;
             Chats = _Chats_;
 
-            // Inject tab-chats.html as a directive, using $templateCache
+            // Spin up tab-chats.html as a directive, using $templateCache
+            // to fetch the template as a string.
             compileProvider.directive('chatsCtrlTest', function(){
                 return {
                     controller: 'ChatsCtrl',
@@ -46,13 +47,13 @@ describe('Controllers and their Templates', function(){
             $scope.$digest();
 
             // If the Ionic starter app used Pappas style 'controller as' syntax
-            // and bound controller variables to 'this', we could get the controller 
+            // and bound its controller variables to 'this', we could get the controller 
             // instance like this:
             ctrl = template.controller();
 
         }));
 
-    	// Mirrors the controller code exactly.  
+    	// Duplicates the controller code.  Has some descriptive value?
         it('should bind all chats to the scope', function(){
         	expect($scope.chats).toEqual(Chats.all());
         });
@@ -70,7 +71,7 @@ describe('Controllers and their Templates', function(){
         	});
         });
 
-        // The template logic IS worth having a good description of:
+        // A little more useful . . .
         describe('template: tab-chats', function(){
 
         	it('should show a list of chats, if there are chats', function(){
@@ -85,7 +86,7 @@ describe('Controllers and their Templates', function(){
 
         	it('should call the remove method correctly when user deletes an item', function(){
 
-        		var first_item = angular.element(template.find('ion-item')[0]);
+        		var first_item = template.find('ion-item').first();
         		var first_chat = $scope.chats[0];
         		var button = first_item.find('ion-option-button');
 
@@ -98,8 +99,7 @@ describe('Controllers and their Templates', function(){
         	});
 
         	it('should link each item to the correct detail view', function(){
-        		var first_item = angular.element(template.find('ion-item')[0]);
-        		debug = first_item;
+        		var first_item = template.find('ion-item').first();
         		var first_chat = $scope.chats[0];
         		var expected_link = '#/tab/chats/' + first_chat.id;
 

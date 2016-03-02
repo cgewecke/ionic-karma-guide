@@ -15,6 +15,14 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+       'node_modules/jquery/dist/jquery.min.js',
+       'www/lib/ionic/js/ionic.bundle.js',
+       'www/lib/angular-mocks/angular-mocks.js',
+       'www/js/*.js',
+       
+       'tests/controllers/*.js',
+       'tests/directives/*.js',
+       'tests/services/*.js'
     ],
 
 
@@ -23,16 +31,32 @@ module.exports = function(config) {
     ],
 
 
-    // preprocess matching files before serving them to the browser
-    // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
+    customLaunchers: {
+      Chrome_without_security: {
+        base: 'Chrome',
+        flags: ['--disable-web-security']
+      }
+    },
+
+    // Which plugins to enable
+    plugins: [
+      "karma-chrome-launcher",
+      "karma-jasmine",
+      "karma-mocha-reporter",
+      "karma-ng-html2js-preprocessor"
+    ],
+
     preprocessors: {
+      'www/templates/*.html': ['ng-html2js']
+    },
+
+    ngHtml2JsPreprocessor: {
+      moduleName: 'templates',
+      stripPrefix: 'www/'
     },
 
 
-    // test results reporter to use
-    // possible values: 'dots', 'progress'
-    // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress'],
+    reporters: ['mocha'],
 
 
     // web server port

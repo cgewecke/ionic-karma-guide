@@ -242,6 +242,10 @@ table {
     display: block;
 }
 
+.github-fork-ribbon:before {
+    background-color: black !important;
+}
+
 ///////////////////////////
 .highlight  { background: #ffffff; }
 .highlight .c { color: #999988; font-style: italic } /* Comment */

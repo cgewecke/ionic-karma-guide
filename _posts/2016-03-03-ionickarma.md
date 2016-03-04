@@ -81,7 +81,7 @@ $ mkdir tests/services
 {% endhighlight %}
 
 ### Edit karma.config.js
-(The full config for this project can be found [here]().) 
+(The full config for this project can be found [here](https://github.com/cgewecke/ionic-karma-guide/blob/master/karma-guide/karma.conf.js).) 
 
 List jQuery **first** in the files array, _then_ the ionic bundle and angular-mocks, _then_ your html files, _then_ add all the other js files you've declared in index.html and your test files. 
 

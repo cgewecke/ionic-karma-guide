@@ -4,9 +4,9 @@ title: "A Short Guide to Testing Templates & Directives in Ionic Apps with Karma
 ---
 
 ### Using Karma for quick low-level integration testing
-A couple of years ago I went to a lecture at [New Relic](https://github.com/newrelic) and one of their engineers talked about using Karma to validate application logic by testing template behavior. It's super efficient and lets you check the code Angular is encouraging you to embed in the DOM, without having to maintain a separate Selenium based e2e testing regime. Some nice examples of this approach can be found at the [Angular Material](https://github.com/angular/material/blob/master/src/components/button/button.spec.js) project. 
+This guide follows [Volta Jina's approach](https://github.com/vojtajina/ng-directive-testing) to testing Angular code, where Karma specs are written for logic embedded in the templates and validation is done by checking element behavior. Some nice examples of this method can be found at the [Angular Material](https://github.com/angular/material/blob/master/src/components/button/button.spec.js) project.  
 
-This guide uses the [ionic 'tabs' starter](http://ionicframework.com/docs/cli/start.html) as a base. Testing Ionic apps has its idiosyncrasies: ui-router and ionicTemplateCache trigger lots of 'unexpected get' errors from the test runner, so they have to be disabled. This means accessing templates and their controllers is tricky. There are other issues too: how should you test code that runs in a cordova plugin callback? What about directives that get their templates by url?  
+We will be using the [ionic 'tabs' starter](http://ionicframework.com/docs/cli/start.html) as a base. Testing Ionic apps has its idiosyncrasies: ui-router and ionicTemplateCache trigger lots of 'unexpected get' errors from the test runner, so they have to be disabled. This means accessing templates and their controllers is tricky. There are other issues too: how should you test code that runs in a cordova plugin callback? What about directives that get their templates by url?  
 
 ### Table of Contents
 

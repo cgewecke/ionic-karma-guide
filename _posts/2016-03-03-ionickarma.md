@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "A Short Guide to Testing Templates & Directives in Ionic Apps with Karma"
+title: "A Short Guide to Testing Ionic App Templates & Directives"
 ---
 
 ### Using Karma for quick low-level integration testing
@@ -131,7 +131,7 @@ ngHtml2JsPreprocessor: {
 reporters: ['mocha'],
 {% endhighlight %}
 
-Karma is now configured to launch in chrome, pre-fetch your templates and print intelligible color-coded reports. Lets write some tests.
+Now Karma will launch in chrome, pre-fetch your templates and print intelligible color-coded reports. Lets write some tests.
 
 ## <a name="chatsctrl"></a> Testing ChatsCtrl
 
@@ -165,7 +165,7 @@ That's ChatsCtrl: an archetypically 'thin' controller whose sole purpose is to e
 </ion-view>
 {% endhighlight %}
 
-Here's how to set up the test:
+Here's the test set up:
 
 {% highlight javascript %}
 describe('ChatsCtrl and the template: chats-view', function(){
@@ -217,7 +217,7 @@ describe('ChatsCtrl and the template: chats-view', function(){
 });
 {% endhighlight %}
 
-By the end of this block we have clean access to both ChatsCtrl (through $scope) and the tab-chats template (through 'template'). Traditional unit tests for ChatsCtrl with $scope would look like this:
+Now we have clean access to both ChatsCtrl (through $scope) and the tab-chats template (through 'template'). Traditional unit tests for ChatsCtrl with $scope would look like this:
 
 {% highlight javascript %}
 describe('controller: ', function(){
@@ -240,7 +240,7 @@ describe('controller: ', function(){
 });
 {% endhighlight %}
 
-Now let's make sure chats are actually getting listed, the delete button works, and see if each chat item links to the right view: 
+Let's make sure chats are actually getting listed, the delete button works, and each chat item links to the right view: 
 
 {% highlight javascript %}
 describe('template: tab-chats', function(){

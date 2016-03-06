@@ -4,18 +4,17 @@ title: "A Short Guide to Testing Ionic App Templates & Directives"
 ---
 
 ### Using Karma for quick low-level integration testing
-This guide follows [Volta Jina's approach](https://github.com/vojtajina/ng-directive-testing) to testing Angular code, where Karma specs are written for logic embedded in the templates and validation is done by checking element behavior. Some nice examples of this method can be found at the [Angular Material](https://github.com/angular/material/blob/master/src/components/button/button.spec.js) project.  
+This guide follows [Volta Jina's approach](https://github.com/vojtajina/ng-directive-testing) to Angular testing, where Karma specs are written for logic embedded in the templates and validation is done by checking element behavior. Some nice examples of this method can be found at the [Angular Material](https://github.com/angular/material/blob/master/src/components/button/button.spec.js) project.  
 
-We will be using the [ionic 'tabs' starter](http://ionicframework.com/docs/cli/start.html) as a base. Testing Ionic apps has its idiosyncrasies: ui-router and ionicTemplateCache trigger lots of 'unexpected get' errors from the test runner, so they have to be disabled. This means accessing templates and their controllers is tricky. There are other issues too: how should you test code that runs in a cordova plugin callback? What about directives that get their templates by url?  
+We will be using the [ionic 'tabs' starter](http://ionicframework.com/docs/cli/start.html) as a base. Testing Ionic apps has its idiosyncrasies: ui-router and ionicTemplateCache trigger lots of 'unexpected get' errors from the test runner, so [it's common practice to disable them](https://github.com/angular-ui/ui-router/issues/212#issuecomment-69974072). This means accessing templates and their controllers requires some extra steps. We'll walk through these and also look at writing tests around cordova plugins and using the Chrome browser to debug. 
 
 ### Table of Contents
 
-
 [Setting up the test environment](#setup)   
 [Testing a controller and its template](#chatsctrl)   
-[Testing a directive](#directive)   
+[Testing a directive that loads its template by URL](#directive)   
 [Testing with cordova plugins](#cordova)   
-
+[Debugging tests with Chrome](#chrome)
 
 ## <a name="setup"></a> The Test Environment
 
@@ -70,8 +69,11 @@ Ultimately, when you're ready to test you'll run:
 $ gulp test
 {% endhighlight %}
 
-### Make some folders for your tests
-In the project's root directory:
+### Make some folders for your tests 
+
+(Or think about where to put them).
+
+You could, for example, run the following in the project's root directory:
 
 {% highlight bash %}
 $ mkdir tests
@@ -79,6 +81,18 @@ $ mkdir tests/controllers
 $ mkdir tests/directives
 $ mkdir tests/services
 {% endhighlight %}
+
+There is another, perhaps better strategy [advocated by John Papa](https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md#style-y197) which says you should store tests alongside their targets - i.e maintain a directory structure like this: 
+
+{% highlight bash %}
+|-- Controllers
+|   |-- SomeCtrl.js
+|   |-- SomeCtrl.spec.js
+|   |-- AnotherCtrl.js
+|   |-- AnotherCtrl.spec.js
+{% endhighlight %}
+
+The idea here is that one should be toggling back and forth between these files anyway, they are part of each other, it's easier for other people to read, etc. In the config below, we have opted for the first method. 
 
 ### Edit karma.config.js
 (The full config for this project can be found [here](https://github.com/cgewecke/ionic-karma-guide/blob/master/karma-guide/karma.conf.js).) 
@@ -98,7 +112,8 @@ files: [
    ...    
    'tests/controllers/*.js',
    'tests/directives/*.js',
-   'tests/services/*.js'
+   'tests/services/*.js',
+   'tests/templates/*.js'
 ],        
 {% endhighlight %}    
 
@@ -144,7 +159,32 @@ Now Karma will launch in chrome, pre-fetch your templates and print intelligible
 });
 {% endhighlight %}
 
-That's ChatsCtrl: an archetypically 'thin' controller whose sole purpose is to expose service methods to the DOM on $scope. We want some tests that describe the way its wired into the html. Here's the template: it ng-repeats a list. Each item is ng-clickable and has a dynamically generated link. 
+That's ChatsCtrl: an archetypically 'thin' controller whose sole purpose is to expose service methods to the DOM on $scope. A traditional unit test for it in Ionic might look like this:
+
+{% highlight javascript %}
+
+describe('ChatsCtrl, function(){
+
+   it('should bind all chats to the scope', function(){
+
+      expect($scope.chats).toEqual(Chats.all());
+   
+   });
+
+   it('should have a remove method that wraps Chats.remove', function(){  
+
+     var chat = { sender: 'me', receiver: 'you', message: 'hi!'}; 
+     spyOn(Chats, 'remove');
+     $scope.remove(chat); 
+
+     expect(Chats.remove).toHaveBeenCalledWith(chat);
+
+   });
+});
+
+
+We also want some tests that describe the way the controller is wired into the html since that's where most of the logic actually gets expressed. Here's the template: it ng-repeats a list. Each item is ng-clickable and has a dynamically generated link. 
+
 
 {% highlight html %}
 <ion-view view-title="Chats">
@@ -168,7 +208,7 @@ That's ChatsCtrl: an archetypically 'thin' controller whose sole purpose is to e
 Here's the test set up:
 
 {% highlight javascript %}
-describe('ChatsCtrl and the template: chats-view', function(){
+describe('Template: chats-view', function(){
 
     // Locals
     var $scope, $compile, $templateCache, compileProvider, Chats, template, ctrl;
@@ -217,27 +257,8 @@ describe('ChatsCtrl and the template: chats-view', function(){
 });
 {% endhighlight %}
 
-Now we have clean access to both ChatsCtrl (through $scope) and the tab-chats template (through 'template'). Traditional unit tests for ChatsCtrl with $scope would look like this:
+Now we have clean access to the tab-chats DOM (through 'template'). 
 
-{% highlight javascript %}
-describe('controller: ', function(){
-
-   it('should bind all chats to the scope', function(){
-
-      expect($scope.chats).toEqual(Chats.all());
-   
-   });
-
-   it('should have a remove method that wraps Chats.remove', function(){	
-
-     var chat = { sender: 'me', receiver: 'you', message: 'hi!'}; 
-     spyOn(Chats, 'remove');
-     $scope.remove(chat); 
-
-     expect(Chats.remove).toHaveBeenCalledWith(chat);
-
-   });
-});
 {% endhighlight %}
 
 Let's make sure chats are actually getting listed, the delete button works, and each chat item links to the right view: 

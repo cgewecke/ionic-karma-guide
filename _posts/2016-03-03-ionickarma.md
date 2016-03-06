@@ -6,7 +6,7 @@ title: "A Short Guide to Testing Ionic App Templates & Directives"
 ### Using Karma for quick low-level integration testing
 This guide follows [Volta Jina's approach](https://github.com/vojtajina/ng-directive-testing) to Angular testing, where Karma specs are written for logic embedded in the templates and validation is done by checking element behavior. Some nice examples of this method can be found at the [Angular Material](https://github.com/angular/material/blob/master/src/components/button/button.spec.js) project.  
 
-We will be using the [ionic 'tabs' starter](http://ionicframework.com/docs/cli/start.html) as a base. Testing Ionic apps has its idiosyncrasies: ui-router and ionicTemplateCache trigger lots of 'unexpected get' errors from the test runner, so [it's common practice to disable them](https://github.com/angular-ui/ui-router/issues/212#issuecomment-69974072). This means accessing templates and their controllers requires some extra steps. We'll walk through these and also look at writing tests around cordova plugins and using the Chrome browser to debug. 
+We will be using the [ionic 'tabs' starter](http://ionicframework.com/docs/cli/start.html) as a base. Testing Ionic apps has its idiosyncrasies: ui-router and ionicTemplateCache trigger lots of 'unexpected get' errors from the test runner, so [it's common practice to disable them](https://github.com/angular-ui/ui-router/issues/212#issuecomment-69974072). This means accessing templates and their controllers requires some extra steps. We'll walk through these and also look at tests for a directive that uses a cordova plugin and using the Chrome browser to debug. 
 
 ### Table of Contents
 
@@ -92,7 +92,7 @@ There is another, perhaps better strategy [advocated by John Papa](https://githu
 |   |-- AnotherCtrl.spec.js
 {% endhighlight %}
 
-The idea here is that one should be toggling back and forth between these files anyway, they are part of each other, it's easier for other people to read, etc. In the config below, we have opted for the first method. 
+The idea here is that one should be toggling back and forth between these files anyway, they are part of each other, it's easier for other people to read, etc. In the config below we'll just put our tests in a tests folder because the project is so small. 
 
 ### Edit karma.config.js
 (The full config for this project can be found [here](https://github.com/cgewecke/ionic-karma-guide/blob/master/karma-guide/karma.conf.js).) 
@@ -110,10 +110,7 @@ files: [
    ...
    'www/js/*.js',
    ...    
-   'tests/controllers/*.js',
-   'tests/directives/*.js',
-   'tests/services/*.js',
-   'tests/templates/*.js'
+   'tests/*.js'
 ],        
 {% endhighlight %}    
 

@@ -7,10 +7,9 @@ describe('Tab-chats template', function(){
     beforeEach(module('starter'));
     beforeEach(module('templates'));
 
-    // Disable Ionic cache and route provider, get $compileProvider
-    beforeEach(module(function($provide, $urlRouterProvider, $compileProvider) {  
-        $provide.value('$ionicTemplateCache', function(){} );
-        $urlRouterProvider.deferIntercept();
+    // Disable route provider, get $compileProvider
+    beforeEach(module(function($urlRouterProvider, $compileProvider) {  
+        $urlRouterProvider.deferIntercept(); // Do this if your controller injects $state 
         compileProvider = $compileProvider;
     }));
 

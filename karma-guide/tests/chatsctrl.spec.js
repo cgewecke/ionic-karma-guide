@@ -7,12 +7,6 @@ describe('ChatsCtrl', function(){
     // Load app
     beforeEach(module('starter'));
 
-    // Disable Ionic cache and route provider
-    beforeEach(module(function($provide, $urlRouterProvider) {  
-        $provide.value('$ionicTemplateCache', function(){} );
-        $urlRouterProvider.deferIntercept();
-    }));
-
     // Inject services and spin up the controller
     beforeEach(inject(function(_$rootScope_, _$controller_, _Chats_){
         

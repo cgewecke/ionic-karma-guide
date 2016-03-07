@@ -160,7 +160,7 @@ That's ChatsCtrl: an archetypically 'thin' controller whose sole purpose is to e
 
 {% highlight javascript %}
 
-describe('ChatsCtrl, function(){
+describe('ChatsCtrl', function(){
 
    it('should bind all chats to the scope', function(){
 
@@ -214,10 +214,10 @@ describe('Template: chats-view', function(){
     beforeEach(module('starter'));
     beforeEach(module('templates'));
 
-    // Disable Ionic cache and route provider, inject $compileProvider
-    beforeEach(module(function($provide, $urlRouterProvider, $compileProvider) {  
-        $provide.value('$ionicTemplateCache', function(){} );
-        $urlRouterProvider.deferIntercept();
+    // Disable route provider (if your controller uses $state), 
+    // Inject $compileProvider
+    beforeEach(module(function($urlRouterProvider, $compileProvider) {  
+        $urlRouterProvider.deferIntercept(); 
         compileProvider = $compileProvider;
     }));
 
@@ -301,3 +301,5 @@ describe('template: tab-chats', function(){
 Run `$ gulp test` and here's the report:
 
 ![Test Report for ChatsCtrl]({{site.url}}/assets/chatstest1.png){: .center-image }
+
+

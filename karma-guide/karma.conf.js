@@ -18,11 +18,16 @@ module.exports = function(config) {
        'node_modules/jquery/dist/jquery.min.js',
        'www/lib/ionic/js/ionic.bundle.js',
        'www/lib/angular-mocks/angular-mocks.js',
-       'www/js/*.js',
+       "www/lib/ngCordova/dist/ng-cordova.js",
+       "www/lib/ngCordova/dist/ng-cordova-mocks.js",
+       
+       'www/js/app.js',
+       'www/js/addContact.js',
+       'www/js/controllers.js',
+       'www/js/services.js',
        'www/templates/*.html',
        
-       'tests/*.js',
-       
+       'tests/*.js',       
     ],
 
 

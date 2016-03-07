@@ -2,8 +2,7 @@ angular.module('starter')
   .directive("addContact", AddContact);
 
 // @directive: <add-contact contact='someUser'></add-contact>
-// @params: user (the profile object of the user to be added). 
-//
+// @params: contact (the profile object of the user to be added). 
 function AddContact($cordovaContacts){
     return {
        restrict: 'E',   
@@ -13,16 +12,18 @@ function AddContact($cordovaContacts){
       
        link: function(scope, elem, attrs){
 
-          scope.contactAdded = false; // Boolean determines visibility of this directive
+          // Bound to ng-show in the template
+          scope.contactAdded = false; 
 
-          // Adds to native contacts
+          // Bound to ng-click: adds to native contacts
           scope.createContact = function(){
 
-            var contactInfo ={ "displayName": contact.name };
+            var contactInfo ={ "displayName": scope.contact.name };
             
             $cordovaContacts.save(contactInfo).then(function(result) {     
-                scope.contactAdded = true;
-                    
+                scope.contactAdded = true;        
+            }, function(error){
+                scope.contactAdded = false;
             });    
           }
         }

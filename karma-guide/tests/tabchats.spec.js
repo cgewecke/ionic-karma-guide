@@ -1,30 +1,27 @@
 describe('Tab-chats template', function(){
 
 	// Locals
-	var $scope, $compile, $templateCache, compileProvider, template, ctrl;
+	var $scope, $compile, compileProvider, template, ctrl;
 
     // Load app & ng-html2js pre-processed templates
     beforeEach(module('starter'));
     beforeEach(module('templates'));
 
-    // Disable route provider, get $compileProvider
-    beforeEach(module(function($urlRouterProvider, $compileProvider) {  
-        $urlRouterProvider.deferIntercept(); // Do this if your controller injects $state 
+    // Get $compileProvider
+    beforeEach(module(function($compileProvider) {  
         compileProvider = $compileProvider;
     }));
 
 	// Inject services and spin up the template as a directive
-	beforeEach(inject(function(_$rootScope_, _$compile_, _$templateCache_){
+	beforeEach(inject(function(_$rootScope_, _$compile_ ){
         
         $scope = _$rootScope_;
         $compile = _$compile_;
-        $templateCache = _$templateCache_;
 
-        // Use $templateCache to fetch the template as a string.
         compileProvider.directive('chatsCtrlTest', function(){
             return {
                 controller: 'ChatsCtrl',
-                template: $templateCache.get('templates/tab-chats.html')
+                templateUrl: 'templates/tab-chats.html'
             }
         });
 

@@ -1,7 +1,7 @@
 ###########
 # site.title, site.url, site.author.name
 
-title:   'cgewecke'
+title:   'Ionic/Karma Guide'
 author:
   name:  'Jekyll Minimal Theme Team'
 
@@ -9,11 +9,11 @@ author:
 #  use site.path in your templates to make it work for both protocols e.g. http and https
 #  use site.url only inside the web feed template (e.g. requires full url incl. protocol)
 # Production
-path: /ionic-karma-guide
-url:  /ionic-karma-guide
+#path: /ionic-karma-guide
+#url:  /ionic-karma-guide
 # Development
-#path:
-#url:
+path:
+url:
 
 ########
 # more settings

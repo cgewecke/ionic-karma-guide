@@ -97,14 +97,14 @@ The idea here is that one should be toggling back and forth between these files 
 ### Edit karma.config.js
 (The full config for this project can be found [here](https://github.com/cgewecke/ionic-karma-guide/blob/master/karma-guide/karma.conf.js).) 
 
-List jQuery **first** in the files array, _then_ the ionic bundle and angular-mocks, _then_ your html files, _then_ add all the other js files you've declared in index.html and your test files. 
+List jQuery **first** in the files array, _then_ the ionic bundle, angular-mocks and other lib files, _then_ your html files, _then_ add all the other js files you've declared in index.html and your test files. 
 
 {% highlight python %}
 files: [
    
    'node_modules/jquery/dist/jquery.min.js',
    'www/lib/ionic/js/ionic.bundle.js',
-   'www/lib/angular-mocks/angular-mocks.js',
+   'www/lib/angular-mocks/angular-mocks.js',  
    ...
    'www/templates/*.html'
    ...
@@ -162,23 +162,38 @@ That's ChatsCtrl: an archetypically 'thin' controller whose sole purpose is to e
 
 describe('ChatsCtrl', function(){
 
-   it('should bind all chats to the scope', function(){
+    var $scope, $controller, Chats, ctrl;
 
-      expect($scope.chats).toEqual(Chats.all());
-   
-   });
+    // Load app
+    beforeEach(module('starter'));
 
-   it('should have a remove method that wraps Chats.remove', function(){  
+    // Inject services and spin up the controller
+    beforeEach(inject(function(_$rootScope_, _$controller_, _Chats_){
+        
+        $scope = _$rootScope_;
+        $controller = _$controller_;
+        Chats = _Chats_;
 
-     var chat = { sender: 'me', receiver: 'you', message: 'hi!'}; 
-     spyOn(Chats, 'remove');
-     $scope.remove(chat); 
+        ctrl = $controller('ChatsCtrl', {$scope, Chats});
 
-     expect(Chats.remove).toHaveBeenCalledWith(chat);
+    }));
 
-   });
+    // Tests
+    it('should bind all chats to the scope', function(){
+        expect($scope.chats).toEqual(Chats.all());
+    });
+
+    it('should have a remove method that wraps Chats.remove', function(){
+        
+        var chat = { sender: 'me', receiver: 'you', message: 'hi!'};
+        spyOn(Chats, 'remove');
+        $scope.remove(chat);
+
+        expect(Chats.remove).toHaveBeenCalledWith(chat);
+    });
 });
 
+{% endhighlight %}
 
 We also want some tests that describe the way the controller is wired into the html since that's where most of the logic actually gets expressed. Here's the template: it ng-repeats a list. Each item is ng-clickable and has a dynamically generated link. 
 
@@ -188,7 +203,7 @@ We also want some tests that describe the way the controller is wired into the h
   <ion-content>
     <ion-list>
       <ion-item class="etc" ng-repeat="chat in chats" href="#/tab/chats/{% raw %}{{chat.id}}{% endraw %}">
-        <img ng-src="{{chat.face}}">
+        <img ng-src="{% raw %}{{chat.face}}{% endraw %}">
         <h2>{{chat.name}}</h2>
         <p>{{chat.lastText}}</p>
         <i class="icon ion-chevron-right icon-accessory"></i>
@@ -205,7 +220,7 @@ We also want some tests that describe the way the controller is wired into the h
 Here's the test set up:
 
 {% highlight javascript %}
-describe('Template: chats-view', function(){
+describe('tab-chats', function(){
 
     // Locals
     var $scope, $compile, $templateCache, compileProvider, Chats, template, ctrl;
@@ -214,10 +229,8 @@ describe('Template: chats-view', function(){
     beforeEach(module('starter'));
     beforeEach(module('templates'));
 
-    // Disable route provider (if your controller uses $state), 
     // Inject $compileProvider
-    beforeEach(module(function($urlRouterProvider, $compileProvider) {  
-        $urlRouterProvider.deferIntercept(); 
+    beforeEach(module(function($compileProvider) {   
         compileProvider = $compileProvider;
     }));
 
@@ -231,7 +244,6 @@ describe('Template: chats-view', function(){
         Chats = _Chats_;
 
         // Use $templateCache.get to fetch the template as a string
-        // (urlRouting is disabled)
         compileProvider.directive('chatsCtrlTest', function(){
             return {
                 controller: 'ChatsCtrl',
@@ -256,12 +268,10 @@ describe('Template: chats-view', function(){
 
 Now we have clean access to the tab-chats DOM (through 'template'). 
 
-{% endhighlight %}
-
 Let's make sure chats are actually getting listed, the delete button works, and each chat item links to the right view: 
 
 {% highlight javascript %}
-describe('template: tab-chats', function(){
+describe('tab-chats', function(){
 
    it('should show a list of chats', function(){
 
@@ -301,5 +311,20 @@ describe('template: tab-chats', function(){
 Run `$ gulp test` and here's the report:
 
 ![Test Report for ChatsCtrl]({{site.url}}/assets/chatstest1.png){: .center-image }
+
+## Testing a directive: <add-contact>
+
+Let's sketch a little directive that might be used to add a chat sender's info to the device's contacts. It will load its template by URL. The directive definition: 
+
+{% highlight javascript %}
+
+{% endhighlight %}
+
+And the template at itself:
+
+{% highlight html %}
+
+{% endhighlight %}
+
 
 

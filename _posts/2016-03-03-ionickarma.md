@@ -6,7 +6,7 @@ title: "A Short Guide to Testing Ionic App Templates & Directives"
 ### Using Karma for quick low-level integration testing
 This guide follows [Volta Jina's approach](https://github.com/vojtajina/ng-directive-testing) to Angular testing, where Karma specs are written for logic embedded in the templates and validation is done by checking element behavior. Some nice examples of this strategy can be found at the [Angular Material](https://github.com/angular/material/blob/master/src/components/button/button.spec.js) project.  
 
-We will be using the [ionic 'tabs' starter](http://ionicframework.com/docs/cli/start.html) as a base. Testing Ionic apps has its idiosyncrasies: ui-router and ionicTemplateCache trigger lots of 'unexpected request' errors from the test runner, so [it's common practice to disable them](https://github.com/angular-ui/ui-router/issues/212#issuecomment-69974072). This means accessing templates and their controllers requires some extra steps. We'll walk through these, write tests for a tab view and then look at a directive that uses cordova plugins.
+We will be using the [ionic 'tabs' starter](http://ionicframework.com/docs/cli/start.html) as a base. Testing Ionic apps has its idiosyncrasies: ui-router and ionicTemplateCache trigger lots of 'unexpected request' errors from the test runner - in fact [it's common practice to disable them](https://github.com/angular-ui/ui-router/issues/212#issuecomment-69974072). This means accessing templates and their controllers requires some extra steps. We'll walk through these, write tests for a tab view and then look at a directive that uses cordova plugins.
 
 ### Table of Contents
 
@@ -247,7 +247,7 @@ describe('tab-chats', function(){
         $compile = _$compile_;
         Chats = _Chats_;
 
-        // Use $templateCache.get to fetch the template as a string
+        // Behind the scenes, templateUrl will grab the template from $templateCache
         compileProvider.directive('chatsCtrlTest', function(){
             return {
                 controller: 'ChatsCtrl',
@@ -340,7 +340,7 @@ describe('<add-contact>', function(){
 })
 {% endhighlight %}
 
-Here's the directive template: it's a footer bar with a button inviting you to add a contact. It's meant to sit at the bottom of the chats-detail view. 
+Here's our directive template: it's a footer bar with a button inviting you to add a contact. It's meant to sit at the bottom of the chats-detail view. 
 
 {% highlight html %}
 <ion-footer-bar align-title="left" class="..." ng-show="!contactAdded">
@@ -386,7 +386,7 @@ function AddContact($cordovaContacts){
  };
 {% endhighlight %}
 
-This directive is pretty fake but it has all the problems a real one would have: isolate scope, a mocked service dependency and code inside a promise callback. The test sets up like this:
+This directive is pretty fake but it has all the problems a real one would have: isolate scope, a service dependency that needs to be mocked and code inside a promise callback. The test sets up like this:
 
 {% highlight javascript %}
 describe('<add-contact>', function(){

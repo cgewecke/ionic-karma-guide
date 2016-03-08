@@ -4,7 +4,7 @@ title: "A Short Guide to Testing Ionic App Templates & Directives"
 ---
 
 ### Using Karma for quick low-level integration testing
-This guide follows [Volta Jina's approach](https://github.com/vojtajina/ng-directive-testing) to Angular testing, where Karma specs are written for logic embedded in the templates and validation is done by checking element behavior. Some nice examples of this method can be found at the [Angular Material](https://github.com/angular/material/blob/master/src/components/button/button.spec.js) project.  
+This guide follows [Volta Jina's approach](https://github.com/vojtajina/ng-directive-testing) to Angular testing, where Karma specs are written for logic embedded in the templates and validation is done by checking element behavior. Some nice examples of this strategy can be found at the [Angular Material](https://github.com/angular/material/blob/master/src/components/button/button.spec.js) project.  
 
 We will be using the [ionic 'tabs' starter](http://ionicframework.com/docs/cli/start.html) as a base. Testing Ionic apps has its idiosyncrasies: ui-router and ionicTemplateCache trigger lots of 'unexpected request' errors from the test runner, so [it's common practice to disable them](https://github.com/angular-ui/ui-router/issues/212#issuecomment-69974072). This means accessing templates and their controllers requires some extra steps. We'll walk through these, write tests for a tab view and then look at a directive that uses cordova plugins.
 
@@ -92,23 +92,26 @@ There is another, perhaps better strategy [advocated by John Papa](https://githu
 |   |-- AnotherCtrl.spec.js
 {% endhighlight %}
 
-The idea here is that one should be toggling back and forth between these files anyway - they are part of each other. In the config below we'll just put our tests in a dedicated folder because the project is small and doesn't have a lot of directory structure. 
+The idea here is that one should treat the tests as part of the code and keep them close at hand. This project is small and doesn't have much directory structure so we'll just put our tests in a dedicated folder.
 
 ### Edit karma.config.js
 (The full config for this project can be found [here](https://github.com/cgewecke/ionic-karma-guide/blob/master/karma-guide/karma.conf.js).) 
 
-List jQuery **first** in the files array, _then_ the ionic bundle, angular-mocks and other lib files, _then_ your html files, _then_ add all the other js files you've declared in index.html and your test files. 
+List jQuery **first** in the files array, _then_ the ionic bundle, angular-mocks and other lib files, _then_ your html files, _then_ add any other js files you've declared in index.html and your test files. 
 
 {% highlight python %}
 files: [
    
    'node_modules/jquery/dist/jquery.min.js',
    'www/lib/ionic/js/ionic.bundle.js',
-   'www/lib/angular-mocks/angular-mocks.js',  
+   'www/lib/angular-mocks/angular-mocks.js', 
    ...
    'www/templates/*.html'
    ...
-   'www/js/*.js',
+   'www/js/app.js',
+   'www/js/addContact.js',
+   'www/js/controllers.js',
+   'www/js/services.js',
    ...    
    'tests/*.js'
 ],        
@@ -475,7 +478,7 @@ it('should NOT hide itself if adding contact failed', function(){
 
 ## Contact
 -----------------------------
-Feel free to ask questions or make suggestions via the [issues](https://github.com/cgewecke/ionic-karma-guide/issues) page for this project. There are no special guidelines - just open an issue and write whatever you want. 
+Feel free to ask questions or make suggestions via the [issues](https://github.com/cgewecke/ionic-karma-guide/issues) page for this project. There are no special guidelines - just open an issue and write. 
 
 
 

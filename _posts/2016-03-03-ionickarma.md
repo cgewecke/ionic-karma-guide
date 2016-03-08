@@ -6,17 +6,17 @@ title: "A Short Guide to Testing Ionic App Templates & Directives"
 ### Using Karma for quick low-level integration testing
 This guide follows [Volta Jina's approach](https://github.com/vojtajina/ng-directive-testing) to Angular testing, where Karma specs are written for logic embedded in the templates and validation is done by checking element behavior. Some nice examples of this method can be found at the [Angular Material](https://github.com/angular/material/blob/master/src/components/button/button.spec.js) project.  
 
-We will be using the [ionic 'tabs' starter](http://ionicframework.com/docs/cli/start.html) as a base. Testing Ionic apps has its idiosyncrasies: ui-router and ionicTemplateCache trigger lots of 'unexpected get' errors from the test runner, so [it's common practice to disable them](https://github.com/angular-ui/ui-router/issues/212#issuecomment-69974072). This means accessing templates and their controllers requires some extra steps. We'll walk through these and also look at tests for a directive that uses a cordova plugin and using the Chrome browser to debug. 
+We will be using the [ionic 'tabs' starter](http://ionicframework.com/docs/cli/start.html) as a base. Testing Ionic apps has its idiosyncrasies: ui-router and ionicTemplateCache trigger lots of 'unexpected request' errors from the test runner, so [it's common practice to disable them](https://github.com/angular-ui/ui-router/issues/212#issuecomment-69974072). This means accessing templates and their controllers requires some extra steps. We'll walk through these, write tests for a tab view and then look at a directive that uses cordova plugins.
 
 ### Table of Contents
 
 [Setting up the test environment](#setup)   
 [Testing a controller and its template](#chatsctrl)   
-[Testing a directive that loads its template by URL](#directive)   
-[Testing with cordova plugins](#cordova)   
-[Debugging tests with Chrome](#chrome)
+[Testing a directive that uses cordova plugins](#cordova)  
+
 
 ## <a name="setup"></a> The Test Environment
+--------------------------------------------
 
 [karma](http://karma-runner.github.io/0.13/intro/installation.html): the test runner    
 [jasmine](https://github.com/karma-runner/karma-jasmine): the testing framework    
@@ -92,7 +92,7 @@ There is another, perhaps better strategy [advocated by John Papa](https://githu
 |   |-- AnotherCtrl.spec.js
 {% endhighlight %}
 
-The idea here is that one should be toggling back and forth between these files anyway, they are part of each other, it's easier for other people to read, etc. In the config below we'll just put our tests in a tests folder because the project is so small. 
+The idea here is that one should be toggling back and forth between these files anyway - they are part of each other. In the config below we'll just put our tests in a dedicated folder because the project is small and doesn't have a lot of directory structure. 
 
 ### Edit karma.config.js
 (The full config for this project can be found [here](https://github.com/cgewecke/ionic-karma-guide/blob/master/karma-guide/karma.conf.js).) 
@@ -143,9 +143,11 @@ ngHtml2JsPreprocessor: {
 reporters: ['mocha'],
 {% endhighlight %}
 
-Now Karma will launch in chrome, pre-fetch your templates and print intelligible color-coded reports. Lets write some tests.
+Now Karma will launch in chrome, pre-cache your templates so you don't get 'unexpected request' complaints and print intelligible color-coded reports. Lets write some tests.
+
 
 ## <a name="chatsctrl"></a> Testing ChatsCtrl
+---------------------------------------------
 
 {% highlight javascript %}
 .controller('ChatsCtrl', function($scope, Chats) {
@@ -195,7 +197,7 @@ describe('ChatsCtrl', function(){
 
 {% endhighlight %}
 
-We also want some tests that describe the way the controller is wired into the html since that's where most of the logic actually gets expressed. Here's the template: it ng-repeats a list. Each item is ng-clickable and has a dynamically generated link. 
+We also want tests that describe the way the controller is wired into the html since that's where most of the logic actually gets expressed. Here's the template: it ng-repeats a list. Each item is ng-clickable and has a dynamically generated link. 
 
 
 {% highlight html %}
@@ -217,7 +219,7 @@ We also want some tests that describe the way the controller is wired into the h
 </ion-view>
 {% endhighlight %}
 
-Here's the test set up:
+And the test set up:
 
 {% highlight javascript %}
 describe('tab-chats', function(){
@@ -236,18 +238,17 @@ describe('tab-chats', function(){
 
     // Inject services, 
     // Spin up the template as a directive with ChatsCtrl as its controller
-    beforeEach(inject(function(_$rootScope_, _$compile_, _$templateCache_, _Chats_){
+    beforeEach(inject(function(_$rootScope_, _$compile_, _Chats_){
         
         $scope = _$rootScope_;
         $compile = _$compile_;
-        $templateCache = _$templateCache_;
         Chats = _Chats_;
 
         // Use $templateCache.get to fetch the template as a string
         compileProvider.directive('chatsCtrlTest', function(){
             return {
                 controller: 'ChatsCtrl',
-                template: $templateCache.get('templates/tab-chats.html')
+                templateUrl:'templates/tab-chats.html'
             }
         });
 
@@ -266,9 +267,7 @@ describe('tab-chats', function(){
 });
 {% endhighlight %}
 
-Now we have clean access to the tab-chats DOM (through 'template'). 
-
-Let's make sure chats are actually getting listed, the delete button works, and each chat item links to the right view: 
+Now we have clean access to the tab-chats DOM through 'template'. Let's make sure chats are actually getting listed, the delete button works, and each chat item links to the right view: 
 
 {% highlight javascript %}
 describe('tab-chats', function(){
@@ -308,23 +307,176 @@ describe('tab-chats', function(){
 
 {% endhighlight %}
 
-Run `$ gulp test` and here's the report:
+Run `$ gulp test` to see the report:
 
 ![Test Report for ChatsCtrl]({{site.url}}/assets/chatstest1.png){: .center-image }
 
-## Testing a directive: <add-contact>
 
-Let's sketch a little directive that might be used to add a chat sender's info to the device's contacts. It will load its template by URL. The directive definition: 
+
+## <a name="cordova"></a> Testing a directive that uses an ng-cordova plugin: <add-contact>
+-------------------------------------------------------------------------------------------
+
+Let's sketch a small directive that adds a chat sender's name to the device's contacts. NgCordova comes with its own set of mocks to help you develop in the browser without throwing lots of errors. A nice tutorial for getting your project to automatically toggle between mock/browser and cordova/device builds can be found [here](http://justinrodenbostel.com/2015/02/04/getting-started-with-ionic-ngcordova/). Fortunately you can use the mocks in your tests without having to write an intricate build script. Just add them after ng-cordova in the karma.config.js files declaration.  
+
+{% highlight python %}
+files: [
+       ...
+       "www/lib/ngCordova/dist/ng-cordova.js",
+       "www/lib/ngCordova/dist/ng-cordova-mocks.js",
+       ...    
+],
+{% endhighlight %}
+
+Then load the ngCordovaMocks module after your app module at the top of a test. The mock methods will automatically override the real ones. 
 
 {% highlight javascript %}
+describe('<add-contact>', function(){
 
+    // Load app, cordova mocks
+    beforeEach(module('starter'));
+    beforeEach(module('ngCordovaMocks'));
+    
+    // ...
+    // ...
+
+})
 {% endhighlight %}
 
-And the template at itself:
+Here's the directive template: it's a footer bar with a button inviting you to add a contact. It's meant to sit at the bottom of the chats-detail view. 
 
 {% highlight html %}
-
+<ion-footer-bar align-title="left" class="..." ng-show="!contactAdded">
+    <h1 class="title" >
+      <span> Add {{contact.name}} to contacts </span>
+    </h1>
+    <div class="buttons">
+        <button class="..." ng-click="createContact()"></button>
+    </div>
+</ion-footer-bar>
 {% endhighlight %}
+
+And here's the directive: It binds an object to the 'contact' attribute and has a method called 'createContact' that uses $cordovaContacts   
+{% highlight javascript %}
+angular.module('starter')
+  .directive("addContact", AddContact);
+
+function AddContact($cordovaContacts){
+    return {
+       restrict: 'E',   
+       replace: true,
+       scope: {contact: '='},
+       templateUrl: 'templates/addContact.html',
+      
+       link: function(scope, elem, attrs){
+
+          // Bound to ng-show in the template
+          scope.contactAdded = false; 
+
+          // Bound to ng-click: adds to native contacts
+          scope.createContact = function(){
+
+            var contactInfo ={ "displayName": scope.contact.name };
+            
+            $cordovaContacts.save(contactInfo).then(function(result) {     
+                scope.contactAdded = true;        
+            }, function(error){
+                scope.contactAdded = false;
+            });    
+          }
+        }
+    };
+ };
+{% endhighlight %}
+
+This directive is pretty fake but it has all the problems a real one would have. . . isolate scope, a service dependency that famously breaks everything and code inside a promise callback. The test sets up like this:
+
+{% highlight javascript %}
+describe('<add-contact>', function(){
+
+  // Locals
+  var $scope, $compile, $cordovaContacts, scope, template;
+
+    // Load app, cordova mocks, and ng-html2js pre-processed templates
+    beforeEach(module('starter'));
+    beforeEach(module('ngCordovaMocks'));
+    beforeEach(module('templates'));
+
+  // Inject services and compile directive
+  beforeEach(inject(function(_$rootScope_, _$compile_, _$cordovaContacts_, _Chats_ ){
+        
+        $rootScope = _$rootScope_;
+        $compile = _$compile_;
+        $cordovaContacts = _$cordovaContacts_;
+        
+        //Get a chat to pass to the directive
+        $rootScope.chat = _Chats_.all()[0];
+
+        // Compile 
+        template = angular.element('<add-contact contact="chat"></add-contact>');
+        $compile(template)($rootScope);
+        $rootScope.$digest();
+
+        // Access directive's scope
+        scope = template.isolateScope(); 
+
+    })); 
+
+    // ... Tests ...
+{% endhighlight %}
+
+To mock the 'contact' attribute value we've created a variable on $rootScope and referenced it in the DOM string that's getting compiled. Then we've accessed the directive's own scope by calling angular.element's isolateScope() on the compiled directive. Let's test the button:
+
+{% highlight javascript %}
+it('should create a contact when the user taps the plus button', function(){
+
+  var button = template.find('button');
+  var expected_contact = { displayName: $rootScope.chat.name };
+
+  spyOn(scope, 'createContact').and.callThrough();
+  spyOn($cordovaContacts, 'save').and.callThrough();
+
+  button.triggerHandler('click');
+  $rootScope.$digest();
+
+  expect($cordovaContacts.save).toHaveBeenCalledWith(expected_contact);
+
+})
+{% endhighlight %}
+
+Using Jasmine's callThrough method we can go from the button element down to the core of createContact() and verify that $cordovaContacts gets called with the correct data. ($cordovaContacts has to be called through as well or the underlying code will throw an error when it hits the 'then' statement).
+
+Let's test the code inside the promise callback and use an ng-cordova-mocks feature that lets you emulate callback error by setting a service's 'throwsError' field to 'true':
+
+{% highlight javascript %}
+it('should hide itself after adding a contact', function(){
+
+  spyOn($cordovaContacts, 'save').and.callThrough();
+
+  scope.createContact();
+  $rootScope.$digest();
+
+  expect(template.hasClass('ng-hide')).toBe(true);
+
+});
+
+it('should NOT hide itself if adding contact failed', function(){
+
+  $cordovaContacts.throwsError = true;
+  spyOn($cordovaContacts, 'save').and.callThrough();
+
+  scope.createContact();
+  $rootScope.$digest();
+
+  expect(template.hasClass('ng-hide')).toBe(false);
+
+})
+{% endhighlight %}
+
+
+## Contact
+-----------------------------
+Feel free to ask questions or make suggestions via the [issues](https://github.com/cgewecke/ionic-karma-guide/issues) page for this project. There are no special guidelines - just open an issue and write whatever you want. 
+
 
 
 

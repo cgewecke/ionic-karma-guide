@@ -92,12 +92,12 @@ There is another, perhaps better strategy [advocated by John Papa](https://githu
 |   |-- AnotherCtrl.spec.js
 {% endhighlight %}
 
-The idea here is that one should treat the tests as part of the code and keep them close at hand. This project is small and doesn't have much directory structure so we'll just put our tests in a dedicated folder.
+The idea here is that the tests are an integral part of the code and should be kept close at hand. This project is small and doesn't have much directory structure so we'll just put our tests in a dedicated folder.
 
 ### Edit karma.config.js
 (The full config for this project can be found [here](https://github.com/cgewecke/ionic-karma-guide/blob/master/karma-guide/karma.conf.js).) 
 
-List jQuery **first** in the files array, _then_ the ionic bundle, angular-mocks and other lib files, _then_ your html files, _then_ add any other js files you've declared in index.html and your test files. 
+List jQuery **first** in the files array, _then_ the ionic bundle and other lib files, _then_ your html files, _then_ any other js files you've declared in index.html and your test files. 
 
 {% highlight python %}
 files: [
@@ -146,7 +146,7 @@ ngHtml2JsPreprocessor: {
 reporters: ['mocha'],
 {% endhighlight %}
 
-Now Karma will launch in chrome, pre-cache your templates so you don't get 'unexpected request' complaints and print intelligible color-coded reports. Lets write some tests.
+Now Karma will launch in chrome, pre-cache your templates (to avoid router calls) and print intelligible color-coded reports. Lets write some tests.
 
 
 ## <a name="chatsctrl"></a> Testing ChatsCtrl
@@ -161,7 +161,7 @@ Now Karma will launch in chrome, pre-cache your templates so you don't get 'unex
 });
 {% endhighlight %}
 
-That's ChatsCtrl: an archetypically 'thin' controller whose sole purpose is to expose service methods to the DOM on $scope. A traditional unit test for it in Ionic might look like this:
+That's ChatsCtrl: an archetypically 'thin' controller whose sole purpose is to expose service methods to the DOM on $scope. A traditional unit test for it looks like this:
 
 {% highlight javascript %}
 
@@ -270,7 +270,7 @@ describe('tab-chats', function(){
 });
 {% endhighlight %}
 
-Now we have clean access to the tab-chats DOM through 'template'. Let's make sure chats are actually getting listed, the delete button works, and each chat item links to the right view: 
+Now we can access to the tab-chats DOM through 'template'. Let's make sure chats are actually getting listed, the delete button works, and each chat item links to the right view: 
 
 {% highlight javascript %}
 describe('tab-chats', function(){
@@ -310,16 +310,11 @@ describe('tab-chats', function(){
 
 {% endhighlight %}
 
-Run `$ gulp test` to see the report:
-
-![Test Report for ChatsCtrl]({{site.url}}/assets/chatstest1.png){: .center-image }
-
-
 
 ## <a name="cordova"></a> Testing a directive that uses an ng-cordova plugin: <add-contact>
 -------------------------------------------------------------------------------------------
 
-Let's sketch a small directive that adds a chat sender's name to the device's contacts. NgCordova comes with its own set of mocks to help you develop in the browser without throwing lots of errors. A nice tutorial for getting your project to automatically toggle between mock/browser and cordova/device builds can be found [here](http://justinrodenbostel.com/2015/02/04/getting-started-with-ionic-ngcordova/). Fortunately you can use the mocks in your tests without having to write an intricate build script. Just add them after ng-cordova in the karma.config.js files declaration.  
+Let's sketch a small directive that adds a chat sender's name to the device's contacts. [NgCordova](http://ngcordova.com/) comes with its own set of mocks to help you develop in the browser. A nice tutorial for setting up your project to toggle between mock/browser and cordova/device builds can be found [here](http://justinrodenbostel.com/2015/02/04/getting-started-with-ionic-ngcordova/). Fortunately, you can use the mocks in your tests without having to write an intricate build script. Just add them after ng-cordova in the karma.config.js files declaration.  
 
 {% highlight python %}
 files: [
@@ -330,7 +325,7 @@ files: [
 ],
 {% endhighlight %}
 
-Then load the ngCordovaMocks module after your app module at the top of a test. The mock methods will automatically override the real ones. 
+Then load the ngCordovaMocks module after your app module at the top of a test. The mock methods will override the real ones. 
 
 {% highlight javascript %}
 describe('<add-contact>', function(){
@@ -391,7 +386,7 @@ function AddContact($cordovaContacts){
  };
 {% endhighlight %}
 
-This directive is pretty fake but it has all the problems a real one would have. . . isolate scope, a service dependency that famously breaks everything and code inside a promise callback. The test sets up like this:
+This directive is pretty fake but it has all the problems a real one would have: isolate scope, a mocked service dependency and code inside a promise callback. The test sets up like this:
 
 {% highlight javascript %}
 describe('<add-contact>', function(){
@@ -427,7 +422,7 @@ describe('<add-contact>', function(){
     // ... Tests ...
 {% endhighlight %}
 
-To mock the 'contact' attribute value we've created a variable on $rootScope and referenced it in the DOM string that's getting compiled. Then we've accessed the directive's own scope by calling angular.element's isolateScope() on the compiled directive. Let's test the button:
+To mock the 'contact' attribute value we've created a variable on $rootScope and referenced it in the DOM string that's getting compiled. Then we've accessed the directive's own scope by calling [angular.element's](https://docs.angularjs.org/api/ng/function/angular.element) isolateScope() on the compiled directive. Let's test the button:
 
 {% highlight javascript %}
 it('should create a contact when the user taps the plus button', function(){
@@ -475,6 +470,12 @@ it('should NOT hide itself if adding contact failed', function(){
 })
 {% endhighlight %}
 
+
+## Run the tests
+
+Run `$ gulp test` to see the report:
+
+![Test Report for ChatsCtrl]({{site.url}}/assets/chatstest1.png){: .center-image }
 
 ## Contact
 -----------------------------

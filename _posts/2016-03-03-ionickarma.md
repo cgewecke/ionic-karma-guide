@@ -270,7 +270,7 @@ describe('tab-chats', function(){
 });
 {% endhighlight %}
 
-Now we can access to the tab-chats DOM through 'template'. Let's make sure chats are actually getting listed, the delete button works, and each chat item links to the right view: 
+Now we can access the tab-chats DOM through 'template'. Let's make sure chats are actually getting listed, the delete button works, and each chat item links to the right view: 
 
 {% highlight javascript %}
 describe('tab-chats', function(){
@@ -353,7 +353,8 @@ Here's our directive template: it's a footer bar with a button inviting you to a
 </ion-footer-bar>
 {% endhighlight %}
 
-And here's the directive: It binds an object to the 'contact' attribute and has a method called 'createContact' that uses $cordovaContacts   
+And here's the directive: It binds an object to the 'contact' attribute and has a method called 'createContact' that uses $cordovaContacts.
+
 {% highlight javascript %}
 angular.module('starter')
   .directive("addContact", AddContact);
@@ -386,7 +387,7 @@ function AddContact($cordovaContacts){
  };
 {% endhighlight %}
 
-This directive is pretty fake but it has all the problems a real one would have: isolate scope, a service dependency that needs to be mocked and code inside a promise callback. The test sets up like this:
+This directive is pretty fake but it has all the problems a real one would have: isolate scope, a service dependency that needs to be mocked and code inside a promise callback. We set the test up like this:
 
 {% highlight javascript %}
 describe('<add-contact>', function(){
